@@ -1,0 +1,109 @@
+{
+ "id": "gestalt-dt",
+ "version": "0.3",
+ "title": "GESTALT (RADS wave tables into PUMP, an SP-303 style compressor)",
+ "category": "Sound",
+ "author": "Robbie (SETTINGS row adapted from digihealth by irpina)",
+ "license": "GPL-2.0-or-later",
+ "description": "GESTALT for the Digitakt mk1, a mash-up of PUMP and RADS, in place of the stock compressor: RADS, Geiger Counter-style wave table destruction in stereo, into PUMP, an SP-303 Vinyl Sim-style levelling compressor, on everything the Digitakt plays. It takes the compressor's page among the master pages (FUNC+LFO), its eight parameters for its settings (kept with each pattern's kit, saved with the project, following SETTINGS > GLOBAL FX/MIX's global compressor), and its time in the render. A = TABLE: OFF, then one of GESTALT's own 512 wave tables (32 families of 16: 00-FF musical, 00.-FF. broken), crossfading as it turns; B = DRIVE into the 8-bit converter, -12 to +51.5 dB; C = SRR, 200 Hz to 48 kHz (OFF); D = BLEND, RADS's dry/wet; E = COMP: OFF, then threshold, ratio and make-up together; F = RATIO: AUTO, 2:1, 3:1, 4:1, 8:1, 10:1, 20:1, LIMIT; G = REL: PUMP through GLUE to LEVEL; H = OUT: the chain's level, -32 to +6 dB. The page: the wave table's curve, bouncing with the output, the eight controls with units and a gain-reduction meter; YES cycles the big curve and the gain-reduction graph. Press and turn for big steps; FUNC + turn snaps; FUNC + REC / STOP / PLAY copies, pastes, clears. SETTINGS > GLOBAL FX/MIX > FX ANIMATION stills the page. On core 4.1's master output and master pages, so it is on every output: main outs, headphones and USB.",
+ "device": "digitakt-mk1",
+ "os": "1.53",
+ "sources": [
+  "src/pump.c",
+  "src/rads.c",
+  "src/radsloop.s",
+  "src/pumploop.s",
+  "src/pumpdt.c",
+  "src/pumpdtset.s"
+ ],
+ "cflags": [
+  "-DPUMP_CEILING",
+  "-DPUMP_DT",
+  "-DDT_FONT_W_ADDR=0x40200b20",
+  "-DDT_FONT_O_ADDR=0x40200c20",
+  "-DDT_FONT_B_ADDR=0x40200e20",
+  "-DDT_POPUP_ADDR=0x40093a6c",
+  "-fno-auto-inc-dec"
+ ],
+ "sites": [
+  {
+   "addr": "0x4007425e",
+   "stock": "4fefffac48d77cfc",
+   "op": "jmp",
+   "target": "digipump_comp"
+  }
+ ],
+ "ports": {
+  "1.54": {
+   "cflags": [
+    "-DPUMP_CEILING",
+    "-DPUMP_DT",
+    "-DDT_FONT_W_ADDR=0x40200ed0",
+    "-DDT_FONT_O_ADDR=0x40200fd0",
+    "-DDT_FONT_B_ADDR=0x402011d0",
+    "-DDT_POPUP_ADDR=0x40093ab0",
+    "-fno-auto-inc-dec"
+   ],
+   "defsym": {
+    "OS154": 1
+   },
+   "sites": [
+    {
+     "addr": "0x4007425e",
+     "stock": "4fefffac48d77cfc",
+     "op": "jmp",
+     "target": "digipump_comp"
+    }
+   ]
+  }
+ },
+ "subscribe": [
+  {
+   "event": "ev_render_master",
+   "fn": "digipump_render",
+   "order": 70
+  },
+  {
+   "event": "ev_tick",
+   "fn": "pumpdt_tick",
+   "order": 40
+  },
+  {
+   "event": "ev_key",
+   "fn": "pumpdt_evkey",
+   "order": 40
+  },
+  {
+   "event": "ev_fxmix",
+   "fn": "pumpdt_fxmix",
+   "order": 60
+  }
+ ],
+ "contribute": [
+  {
+   "to": "core_mpages",
+   "order": 70,
+   "data": "00000000",
+   "relocs": [
+    [
+     0,
+     "abs32",
+     "sym:pumpdt_page",
+     0
+    ]
+   ]
+  }
+ ],
+ "requires": [
+  "core"
+ ],
+ "resources": {
+  "names": [
+   "ui:master page GESTALT",
+   "ui:master page COMP (replaced)",
+   "render:compressor",
+   "settings:GLOBAL FX/MIX FX ANIMATION"
+  ],
+  "core": "4.1"
+ }
+}
